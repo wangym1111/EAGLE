@@ -13,7 +13,7 @@ NOW        := $(shell date -u +"%Y-%m-%dT%H:%M:%S")
 export NOW
 
 #activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
-activate = @source /opt/oscer/software/Mamba/23.1.0-4/etc/profile.d/mamba.sh && conda activate $(1) 
+activate = @source /opt/oscer/software/Mamba/23.1.0-4/etc/profile.d/mamba.sh && mamba activate $(1) 
 check    = @$(if $(1),,$(error $(2)= argument required))
 exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
@@ -21,7 +21,7 @@ modenv   = $(env4mod_$(1))
 modloop  = @set -eo pipefail && for mod in $(PACKAGE) $(MODULES); do $(make) mod=$$mod $(1); done
 tasklist = @(set -x && uw execute$(VERBOSE) --module $(PACKAGE)/$(1)/$(2).py --classname $(3)) || true
 
-env4mod_$(PACKAGE)    = base
+env4mod_$(PACKAGE)    = baselocal
 env4mod_data          = data
 env4mod_inference     = anemoi
 env4mod_training      = anemoi
@@ -41,7 +41,7 @@ all:
 
 config:
 	$(call check,$(compose),compose)
-	$(call activate,base)
+	$(call activate,baselocal)
 	@(set -x && uw config compose$(VERBOSE) $(foreach x,$(subst :, ,$(compose)),config/$(x).yaml))
 
 data:
@@ -57,7 +57,7 @@ env:
 	INSTALLDIR=$(INSTALLDIR) ./setup cudascript=$(cudascript)
 
 format:
-	$(call activate,base)
+	$(call activate,baselocal)
 	./format $(PACKAGE)
 
 grids-and-meshes:
@@ -89,11 +89,11 @@ endif
 
 realize:
 	$(call check,$(config),config)
-	$(call activate,base)
+	$(call activate,baselocal)
 	@(set -x && uw config realize$(VERBOSE) --input-file $(config)$(if $(update), --update-file $(update)))
 
 shellcheck:
-	$(call activate,base)
+	$(call activate,baselocal)
 	@echo "=> Checking shell scripts"
 	@(set -x && shellcheck --format=gcc --severity=info --shell=bash $(BASHSRCS))
 
@@ -128,7 +128,7 @@ endif
 
 validate:
 	$(call check,$(config),config)
-	$(call activate,base)
+	$(call activate,baselocal)
 	@(set -x && uw config validate$(VERBOSE) --input-file $(config) --schema-file $(PACKAGE)/$(PACKAGE).jsonschema)
 
 vis:
@@ -178,7 +178,7 @@ vx-obs-lam:
 	@$(make) vx truth=obs extent=lam
 
 yamllint:
-	$(call activate,base)
+	$(call activate,baselocal)
 	@echo "=> Linting YAML configs"
 	@(set -x && yamllint --no-warnings config/ envs/)
 
