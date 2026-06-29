@@ -11,7 +11,7 @@ INSTALLDIR=$(readlink -f ${INSTALLDIR:-$PWD/conda})
 
 cachedir() {
   (
-    env_activate base
+    #env_activate base
     echo $CONDA_PREFIX/cache
   )
 }
@@ -19,7 +19,7 @@ cachedir() {
 clean_conda_pkgs_maybe() {
   if [[ -n ${EAGLE_CLEAN_CONDA_PKGS+x} ]]; then
     (
-      env_activate base
+      #env_activate base
       msg Cleaning conda package cache
       mamba clean --all --yes
     )
@@ -44,7 +44,8 @@ cuda_release() {
 env_activate() {
   local env
   env=$1
-  source $INSTALLDIR/etc/profile.d/mamba.sh
+  #source $INSTALLDIR/etc/profile.d/mamba.sh
+  source /opt/oscer/software/Mamba/23.1.0-4/etc/profile.d/mamba.sh
   # Activation scripts shipped with conda packages may contain statements either expanding undefined
   # variables or exiting with error status, so temporarily disable the checks for these conditions,
   # then enable again.
@@ -117,7 +118,7 @@ prep_env() {
   name=$1
   args=(${MAMBAFLAGS[@]} --file envs/$name.yaml --name $name)
   (
-    env_activate base
+    #env_activate base
     if env_exists $name; then
       msg Updating environment: $name
       mamba env update ${args[@]} | { grep --line-buffered -v "Requirement already satisfied" || true; }
@@ -186,15 +187,16 @@ EOF
   )
 }
 
-prep_env_base() {
+prep_env_baselocal() {
   local name
-  name=base
+  name=baselocal
+  prep_env $name
   (
     env_activate $name
     msg Updating environment: $name
     mamba env update ${MAMBAFLAGS[@]} --file envs/$name.yaml
-    install_devpkgs_maybe $name
-    clean_conda_pkgs_maybe
+    #install_devpkgs_maybe $name
+    #clean_conda_pkgs_maybe
   )
 }
 
@@ -236,13 +238,15 @@ prep_env_wxvx() {
 }
 
 parse_kvargs $@
-install_conda
+# On schooner, we do not install conda
+#install_conda
 CONDA_OVERRIDE_CUDA=$(cuda_release)
-MAMBAFLAGS=(--log-level error --yes)
+#MAMBAFLAGS=(--log-level error --yes)
+MAMBAFLAGS=( )
 MAMBA_ROOT_PREFIX=$INSTALLDIR
 XDG_CACHE_HOME=$(cachedir)
 export CONDA_OVERRIDE_CUDA MAMBA_ROOT_PREFIX XDG_CACHE_HOME
-environments=(anemoi base data visualization wxvx)
+environments=(anemoi baselocal data visualization wxvx)
 for name in ${environments[@]}; do
   time prep_env_$name
 done

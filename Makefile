@@ -12,7 +12,8 @@ NOW        := $(shell date -u +"%Y-%m-%dT%H:%M:%S")
 
 export NOW
 
-activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
+#activate = @source $(INSTALLDIR)/etc/profile.d/conda.sh && conda activate $(1)
+activate = @source /opt/oscer/software/Mamba/23.1.0-4/etc/profile.d/mamba.sh && conda activate $(1) 
 check    = @$(if $(1),,$(error $(2)= argument required))
 exec     = set -x && uw execute$(VERBOSE) --config-file $(config) --module $(PACKAGE)/$(1)/$(2).py --classname $(3) --task $(4)
 make     = $(MAKE) --no-print-directory
